@@ -1,0 +1,21 @@
+import random
+
+
+WORDS = {"dog", "table", "fish", "books", "vertigo"}
+
+
+def guess_word():
+    word = select_word()
+    guesses = [None for char in word]
+    while 1:
+        if game_over(): break
+        pass #TODO
+
+def select_word():
+    return random.choice(WORDS)
+
+def game_over():
+    pass
+
+def play_game():
+    guess_word()
