@@ -9,7 +9,7 @@ class HangingmanEngine:
     
     def guess_word(self):
         chances = 3
-        word = [x for x in self.select_word()]
+        word = [x.upper() for x in self.select_word()]
         player_matches = [None for char in word]
         player_guesses = set()
         
@@ -33,7 +33,7 @@ class HangingmanEngine:
         letter = ""
         while letter not in string.ascii_letters or len(letter) != 1:
             letter = input("> ")
-        return letter
+        return letter.upper()
     
     def game_over(self):
         print("Game over")
