@@ -1,4 +1,5 @@
 import random
+import string
 
 
 WORDS = ["dog", "table", "fish", "books", "vertigo"]
@@ -29,7 +30,10 @@ class HangingmanEngine:
         return random.choice(WORDS)
     
     def take_a_guess(self):
-        return input("> ")
+        letter = ""
+        while letter not in string.ascii_letters or len(letter) != 1:
+            letter = input("> ")
+        return letter
     
     def game_over(self):
         print("Game over")
