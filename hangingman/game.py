@@ -1,3 +1,4 @@
+import os.path
 import random
 import string
 
@@ -7,9 +8,19 @@ WORDS = ["dog", "table", "fish", "books", "vertigo"]
 
 class HangingmanEngine:
 
+    levels = {"easy": (4, 5, 6),
+              "normal": (7, 8, 9),
+              "hard": (10, 11, 12),
+              "harder": (13, 14, 15)}
+
+    def __init__(self, level):
+        self.level = str(level)
+        self.words = super(self).levels[self.level]
+        self.chances = 5
+
     def guess_word(self):
-        chances = 3
-        word = [x.upper() for x in self.select_word()]
+        word_length = random.choice(self.words)
+        word = [x.upper() for x in self.select_word(word_length)]
         player_matches = [None for char in word]
         player_guesses = set()
 
@@ -28,8 +39,11 @@ class HangingmanEngine:
             if player_matches == word:
                 return self.game_won()
 
-    def select_word(self):
-        return random.choice(WORDS)
+    def select_word(self, length):
+        words_file = str(length) + ".txt"
+        with open(os.path.normpath(os.path.join("data", words_file)), "r") as f:
+            #TODO
+            return random.choice(WORDS)
 
     def take_a_guess(self):
         letter = ""
