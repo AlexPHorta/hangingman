@@ -1,9 +1,8 @@
+import asyncio
 import random
 import string
 
 from os.path import abspath, dirname, join
-
-WORDS = ["dog", "table", "fish", "books", "vertigo"]
 
 
 class HangingmanEngine:
@@ -13,10 +12,9 @@ class HangingmanEngine:
               "hard": (10, 11, 12),
               "harder": (13, 14, 15)}
 
-    def __init__(self, level):
-        self.level = str(level)
-        self.words = type(self).levels[self.level]
-        self.chances = 5
+    def __init__(self):
+        self.level = "easy"
+        self.setup_level(self.level)
 
     def guess_word(self):
         word_length = random.choice(self.words)
@@ -26,9 +24,9 @@ class HangingmanEngine:
 
         while 1:
             print(word, player_matches, sorted(list(player_guesses)), self.chances)
-            guess = self.take_a_guess()
+            guess = asyncio.run(self.take_a_guess())
             if guess in word:
-                matches = [i for i, _ in enumerate(word) if _ == guess]
+                matches = [i for i, c in enumerate(word) if c == guess]
                 for m in matches:
                     player_matches[m] = guess
             else:
@@ -39,21 +37,32 @@ class HangingmanEngine:
             if player_matches == word:
                 return self.game_won()
 
+    def setup_level(self, level):
+        if (lv := str(level)) not in type(self).levels.keys():
+            raise ValueError("Wrong level name.")
+        else:
+            self.level = lv
+            self.words = type(self).levels[self.level]
+            self.chances = 5
+    
     def select_word(self, length):
         words_file_name = str(length) + ".txt"
         words_file_path = abspath(
             join(dirname(__file__), "data", words_file_name))
         num_words = file_len(words_file_path)
+        
         with open(words_file_path, "r") as f:
             line = random.randint(1, num_words)
             for i, l in enumerate(f):
                 if i == line:
                     return l.strip()
 
-    def take_a_guess(self):
+    async def take_a_guess(self):
         letter = ""
+
         while letter not in string.ascii_letters or len(letter) != 1:
-            letter = input("> ")
+            letter = await send_guess()
+        
         return letter.upper()
 
     def game_over(self):
@@ -74,5 +83,5 @@ def file_len(file_name):
 
 
 if __name__ == "__main__":
-    game = HangingmanEngine("easy")
+    game = HangingmanEngine()
     game.play_game()
