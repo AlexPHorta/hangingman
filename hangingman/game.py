@@ -16,14 +16,23 @@ class HangingmanEngine:
         self.level = "easy"
         self.setup_level(self.level)
 
+    @property
+    def game_state(self):
+        return self._state
+
     def guess_word(self):
         word_length = random.choice(self.words)
         word = [x.upper() for x in self.select_word(word_length)]
         player_matches = [None for char in word]
         player_guesses = set()
 
-        while 1:
-            print(word, player_matches, sorted(list(player_guesses)), self.chances)
+        while not self.game_over:
+            self._state = (
+                word,
+                player_matches,
+                sorted(list(player_guesses)),
+                self.chances
+            )
             guess = asyncio.run(self.take_a_guess())
             if guess in word:
                 matches = [i for i, c in enumerate(word) if c == guess]
@@ -32,10 +41,8 @@ class HangingmanEngine:
             else:
                 player_guesses.add(guess)
                 self.chances -= 1
-            if self.chances == 0:
-                return self.game_over()
-            if player_matches == word:
-                return self.game_won()
+            if self.chances == 0 or player_matches == word:
+                self.game_over = True
 
     def setup_level(self, level):
         if (lv := str(level)) not in type(self).levels.keys():
@@ -44,6 +51,8 @@ class HangingmanEngine:
             self.level = lv
             self.words = type(self).levels[self.level]
             self.chances = 5
+            self._state = tuple()
+            self.game_over = False
     
     def select_word(self, length):
         words_file_name = str(length) + ".txt"
@@ -64,12 +73,6 @@ class HangingmanEngine:
             letter = await send_guess()
         
         return letter.upper()
-
-    def game_over(self):
-        print("Game over")
-
-    def game_won(self):
-        print("Game won")
 
     def play_game(self):
         self.guess_word()
